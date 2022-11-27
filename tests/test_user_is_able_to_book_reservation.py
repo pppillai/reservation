@@ -29,4 +29,3 @@ def test_user_is_able_to_book_reservation(seed_server,
     assert status == 400
     status, response = delete_reservation(client, "A")
     assert status == 200
-
