@@ -46,7 +46,7 @@ async def create_reservation(item: Reservation):
     overlap, overlapping_item = check_if_reservation_overlaps(item)
 
     if overlap:
-        raise HTTPException(status_code=400, detail=overlap)
+        raise HTTPException(status_code=400, detail=f"Sorry {item.reserved_by}, overlapping with {overlapping_item.reserved_for}")
     else:
         data_store.append(item)
     return item
