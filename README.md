@@ -2,7 +2,6 @@
 - create reservation system
   - use fast api/flask? or use click to create cmdline python program and sql lite for db
 - add user interface
-  - use elm without css
 - add test
   - use pytest
 
@@ -19,3 +18,8 @@
     - pip-comiple requirements.in --output-file requirements.txt
   - install the packages by running 
     - pip install -r requirements.txt
+
+## Run the Server
+    - cd to the api_server folder
+    - type the following command
+        uvicorn main:app --reload
