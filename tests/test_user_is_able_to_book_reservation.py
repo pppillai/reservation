@@ -25,7 +25,7 @@ def test_user_is_able_to_book_reservation(seed_server,
     status, response = create_reservation(client, reservation)
     assert status == 200
     status, response = create_reservation(client, reservation)
+    assert response == {'detail': 'Sorry a, overlapping with A'}
     assert status == 400
     status, response = delete_reservation(client, "A")
     assert status == 200
-
