@@ -1,5 +1,6 @@
 from datetime import datetime
 from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 
 data_store = []
 DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
@@ -15,8 +16,20 @@ def check_if_reservation_overlaps(start, end):
     return False, None
 
 
+def check_and_remove_if_exist_reservation(name):
+    for item in data_store:
+        if item['reserved_for'] == name:
+            data_store.remove(item)
+
+
+@app.delete("/delete/{reserved_for}")
+async def delete_reservation(reserved_for):
+    check_and_remove_if_exist_reservation(reserved_for)
+    return {"ok": True}
+
+
 @app.post("/create")
-async def root(reserved_for, reserved_by, start_datetime, end_datetime):
+async def create_reservation(reserved_for, reserved_by, start_datetime, end_datetime):
     try:
         start = datetime.strptime(start_datetime, DATE_FORMAT)
         end = datetime.strptime(end_datetime, DATE_FORMAT)
@@ -40,5 +53,5 @@ async def root(reserved_for, reserved_by, start_datetime, end_datetime):
 
 
 @app.get("/show")
-async def root():
+async def get_reservation():
     return data_store
