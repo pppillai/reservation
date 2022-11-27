@@ -1,24 +1,37 @@
 from datetime import datetime
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+import logging
+import pytz
 
+utc=pytz.UTC
+logger = logging.getLogger(__name__)
 data_store = []
 DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 app = FastAPI()
 
 
-def check_if_reservation_overlaps(start, end):
-    for item in data_store:
-        if item['end_datetime'] >= end >= item['start_datetime']:
+class Reservation(BaseModel):
+    reserved_for: str
+    reserved_by: str
+    start: datetime
+    end: datetime
+
+
+def check_if_reservation_overlaps(item):
+    for ds in data_store:
+        ds.start = ds.start.replace(tzinfo=utc)
+        ds.end = ds.end.replace(tzinfo=utc)
+        if ds.start >= item.end >= ds.end:
             return True, item
-        if item['start_datetime'] <= start <= item['end_datetime']:
+        if ds.start <= item.start <= ds.end:
             return True, item
     return False, None
 
 
 def check_and_remove_if_exist_reservation(name):
     for item in data_store:
-        if item['reserved_for'] == name:
+        if item.reserved_for == name:
             data_store.remove(item)
 
 
@@ -29,27 +42,14 @@ async def delete_reservation(reserved_for):
 
 
 @app.post("/create")
-async def create_reservation(reserved_for, reserved_by, start_datetime, end_datetime):
-    try:
-        start = datetime.strptime(start_datetime, DATE_FORMAT)
-        end = datetime.strptime(end_datetime, DATE_FORMAT)
-    except ValueError as e:
-        raise HTTPException(status_code=404, detail="Please use date time in %Y-%m-%dT%H:%M:%SZ format")
-
-    overlap, item = check_if_reservation_overlaps(start, end)
+async def create_reservation(item: Reservation):
+    overlap, overlapping_item = check_if_reservation_overlaps(item)
 
     if overlap:
-        msg = f"Sorry, {reserved_by} Overlapping with existing reservation {item['reserved_by']}"
-        raise HTTPException(status_code=404, detail=msg)
+        raise HTTPException(status_code=400, detail=overlap)
     else:
-        reservation = {
-            "reserved_for": reserved_for,
-            "reserved_by": reserved_by,
-            "start_datetime": start,
-            "end_datetime": end
-        }
-        data_store.append(reservation)
-    return reservation
+        data_store.append(item)
+    return item
 
 
 @app.get("/show")
