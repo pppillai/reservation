@@ -1,9 +1,4 @@
 # reservation
-- create reservation system
-  - use fast api/flask? or use click to create cmdline python program and sql lite for db
-- add user interface
-- add test
-  - use pytest
 
 ## Setup
   - create a virtual environment
