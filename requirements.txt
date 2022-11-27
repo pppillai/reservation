@@ -68,6 +68,8 @@ python-dotenv==0.21.0
     # via uvicorn
 python-multipart==0.0.5
     # via fastapi
+pytz==2022.6
+    # via -r requirements.in
 pyyaml==6.0
     # via
     #   fastapi
